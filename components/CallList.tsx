@@ -15,8 +15,10 @@ import {
   Copy,
   LucideIcon,
   CalendarCheck2,
+  Play,
 } from "lucide-react";
 import Loader from "./Loader";
+import { toast } from "@/hooks/use-toast";
 
 const CallList = ({ type }: { type: "ended" | "upcoming" | "recordings" }) => {
   const { endedCalls, upcomingCalls, callRecordings, isLoading } =
@@ -50,11 +52,37 @@ const CallList = ({ type }: { type: "ended" | "upcoming" | "recordings" }) => {
     }
   };
 
+  useEffect(() => {
+    try {
+      const fetchRecordings = async () => {
+        const callData = await Promise.all(
+          callRecordings?.map((meeting) => meeting.queryRecordings()) ?? []
+        );
+
+        const recordings = callData
+          .filter((call) => call.recordings.length > 0)
+          .flatMap((call) => call.recordings);
+
+        setRecordings(recordings);
+      };
+
+      if (type === "recordings") {
+        fetchRecordings();
+      }
+    } catch (error) {
+      toast({ title: "Try again later" });
+    }
+  }, [type, callRecordings]);
+
   const calls = getCalls();
   const noCallsMessage = getNoCallsMessage();
+
   if (isLoading) return <Loader />;
   const iconType =
     type === "ended" ? Archive : type === "upcoming" ? CalendarCheck2 : Video;
+
+  const iconType2 =
+    type === "recordings" ? Play : type === "upcoming" ? CalendarCheck2 : Play;
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       {calls && calls.length > 0 ? (
@@ -79,7 +107,7 @@ const CallList = ({ type }: { type: "ended" | "upcoming" | "recordings" }) => {
                     (meeting as Call).id
                   }`
             }
-            buttonIcon1={iconType}
+            buttonIcon1={iconType2}
             buttonText={type === "recordings" ? "Play" : "Start"}
             handleClick={
               type === "recordings"
@@ -89,33 +117,10 @@ const CallList = ({ type }: { type: "ended" | "upcoming" | "recordings" }) => {
           />
         ))
       ) : (
-        <h1 className="text-2xl font-bold text-white">{noCallsMessage}</h1>
+        <h1 className="text-2xl font-bold text-white/50">{noCallsMessage}</h1>
       )}
     </div>
   );
 };
 
 export default CallList;
-
-//   useEffect(() => {
-//     const fetchRecordings = async () => {
-//       const callData = await Promise.all(
-//         callRecordings?.map((meeting) => meeting.queryRecordings()) ?? []
-//       );
-
-//       const recordings = callData
-//         .filter((call) => call.recordings.length > 0)
-//         .flatMap((call) => call.recordings);
-
-//       setRecordings(recordings);
-//     };
-
-//     if (type === "recordings") {
-//       fetchRecordings();
-//     }
-//   }, [type, callRecordings]);
-
-//   if (isLoading) return <Loader />;
-
-//   const calls = getCalls();
-//   const noCallsMessage = getNoCallsMessage();
