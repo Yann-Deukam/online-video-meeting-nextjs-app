@@ -3,6 +3,7 @@ import "./globals.css";
 import { Poppins } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/toaster";
+import "@stream-io/video-react-sdk/dist/css/styles.css";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -12,6 +13,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Meetingz",
   description: "Online video meeting app for multiple users and efficient",
+  icons: {
+    icon: "/icons/logo.svg",
+  },
 };
 
 export default function RootLayout({
